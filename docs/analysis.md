@@ -91,6 +91,7 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 增加 `BlockShorts`
 - 补回 Maasea 官方 `Map Local` 的 `googlevideo.com/initplayback.+&oad` 拦截
 - 使用 Maasea 官方 `youtubei` pattern，兼容带 query 的 `browse/player/next` 请求
+- 修正 Surge 参数传递格式。之前使用 JSON 反斜杠转义会让 Maasea 脚本收到以 `\` 开头的字符串，触发 `JSON Parse error: Unrecognized token '\'`
 
 `yfamilys.com/sgmodule/YouTubeAd.sgmodule` 与 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同，都是 `Script/Youtube/youtube.response.js`。区别主要是：
 

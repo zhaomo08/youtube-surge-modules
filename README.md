@@ -76,6 +76,7 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 保留 UDP 阻断和广告统计 URL Rewrite
 - 补回 Maasea 官方 `Map Local` 的 `googlevideo.com/initplayback.+&oad` 拦截
 - 使用 Maasea 官方 `youtubei` pattern，兼容带 query 的 `browse/player/next` 请求
+- 修正 Surge 参数传递格式，避免 Maasea 脚本出现 `JSON Parse error: Unrecognized token '\'`
 
 它和 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同。本整理版额外保留了 `yfamilys.com` 版本里的 YouTube 广告统计 URL Rewrite，并显式暴露英文参数。
 
