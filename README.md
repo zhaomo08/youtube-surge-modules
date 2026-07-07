@@ -74,8 +74,12 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 默认关闭歌词翻译和字幕翻译，减少和 DualSubs 的功能重叠
 - 暴露 `BlockShorts` 参数，默认不屏蔽 Shorts
 - 保留 UDP 阻断和广告统计 URL Rewrite
+- 补回 Maasea 官方 `Map Local` 的 `googlevideo.com/initplayback.+&oad` 拦截
+- 使用 Maasea 官方 `youtubei` pattern，兼容带 query 的 `browse/player/next` 请求
 
 它和 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同。本整理版额外保留了 `yfamilys.com` 版本里的 YouTube 广告统计 URL Rewrite，并显式暴露英文参数。
+
+如果首页仍然出现 Sponsored 信息流广告，优先在 Surge 里清理脚本持久化缓存 `YouTubeAdvertiseInfo`，然后强制退出 YouTube 重新打开。Maasea 脚本会缓存 protobuf 广告字段识别结果，旧缓存误判时可能放过新的广告样式。
 
 ## 风险提示
 

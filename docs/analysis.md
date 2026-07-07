@@ -86,9 +86,11 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 整理调整：
 
 - 补齐 `#!arguments`
-- 将默认脚本引擎设为 `webview`
+- 将默认脚本引擎固定为 `webview`
 - 默认关闭 `LyricLang` 和 `CaptionLang`
 - 增加 `BlockShorts`
+- 补回 Maasea 官方 `Map Local` 的 `googlevideo.com/initplayback.+&oad` 拦截
+- 使用 Maasea 官方 `youtubei` pattern，兼容带 query 的 `browse/player/next` 请求
 
 `yfamilys.com/sgmodule/YouTubeAd.sgmodule` 与 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同，都是 `Script/Youtube/youtube.response.js`。区别主要是：
 
@@ -98,6 +100,12 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 本仓库整理版基于 `yfamilys.com` 版本，补齐英文参数并保留广告统计 URL Rewrite
 
 不要同时启用 Maasea 官方 `YouTube.Enhance.sgmodule` 和本仓库 `YouTubeAd.Enhance.optimized.sgmodule`，否则同一个 YouTube protobuf 响应会被同一套脚本处理两次。
+
+如果首页出现 Sponsored 信息流广告，优先检查：
+
+- `youtubei.googleapis.com` 是否已经 MITM 成功
+- `YouTubeAd.Enhance.response` 是否命中 `youtubei/v1/browse`
+- 是否存在旧的 `YouTubeAdvertiseInfo` 本地缓存导致广告字段被误加入白名单
 
 ## 兼容风险
 
