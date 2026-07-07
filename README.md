@@ -13,6 +13,15 @@
 | --- | --- | --- |
 | `modules/DualSubs.YouTube.optimized.sgmodule` | 双语字幕、歌词翻译 | 需要字幕时启用 |
 | `modules/YouTubeAd.Enhance.optimized.sgmodule` | 去广告、PIP、后台播放 | 需要去广告增强时启用 |
+| `modules/YouTube.Combined.optimized.sgmodule` | 上面两者的合并版（自用） | 想同时要两种效果时，只启用这一个 |
+
+## 合并版说明
+
+`YouTube.Combined.optimized.sgmodule` 把两个模块合进一个文件，利用 Surge 对同一 URL 多个响应脚本按文件顺序串行执行的行为，固定改写顺序为：Maasea 先清广告字段 → DualSubs 再注入字幕轨道。这样字幕注入不会被去广告脚本的 protobuf 重编码丢掉。
+
+- 启用合并版时，必须禁用另外两个单独模块（以及 Maasea 官方 Enhance），否则同一响应会被处理三次
+- Maasea 侧的 `lyricLang`/`captionLang` 在合并版里写死为 `off`，翻译统一交给 DualSubs（BoxJs 里可换 Vendor、填自己的翻译 API Key）
+- 如果出现播放/字幕异常，说明双脚本串行改写 protobuf 在你的客户端版本上不兼容：退回两个单独模块二选一，或只用 YouTubeAd Enhance 并把它的 `CaptionLang` 设为 `zh-Hans`（Maasea 自带简易字幕翻译，效果弱于 DualSubs 双语，但只有一个脚本、最稳）
 
 ## 直接导入
 
