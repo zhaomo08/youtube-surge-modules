@@ -46,6 +46,12 @@ https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.s
 https://yfamilys.com/sgmodule/YouTubeAd.sgmodule
 ```
 
+Maasea 官方模块地址：
+
+```text
+https://github.com/Maasea/sgmodule/raw/master/YouTube.Enhance.sgmodule
+```
+
 远程脚本：
 
 ```text
@@ -84,6 +90,15 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 默认关闭 `LyricLang` 和 `CaptionLang`
 - 增加 `BlockShorts`
 
+`yfamilys.com/sgmodule/YouTubeAd.sgmodule` 与 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同，都是 `Script/Youtube/youtube.response.js`。区别主要是：
+
+- Maasea 官方模块已经有中文 `#!arguments`
+- Maasea 官方模块有 `Map Local` 拦截 `googlevideo.com/initplayback.+&oad`
+- `yfamilys.com` 版本额外有 `www/s.youtube.com` 广告统计 URL Rewrite
+- 本仓库整理版基于 `yfamilys.com` 版本，补齐英文参数并保留广告统计 URL Rewrite
+
+不要同时启用 Maasea 官方 `YouTube.Enhance.sgmodule` 和本仓库 `YouTubeAd.Enhance.optimized.sgmodule`，否则同一个 YouTube protobuf 响应会被同一套脚本处理两次。
+
 ## 兼容风险
 
 两个模块都处理 `youtubei.googleapis.com/youtubei/v1/player` 和 `get_watch` 的 protobuf 响应。
@@ -99,4 +114,3 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 字幕优先：只用 DualSubs 整理版
 - 去广告优先：只用 YouTubeAd Enhance 整理版
 - 两者都试：先单独验证，再组合启用；异常时二选一
-

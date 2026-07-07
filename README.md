@@ -43,6 +43,20 @@ https://youtubei.googleapis.com/youtubei/v1/get_watch
 - 只需要去广告、PIP、后台播放：启用 `YouTubeAd.Enhance.optimized.sgmodule`
 - 两者都想用：先启用去广告模块测试播放稳定性，再启用 DualSubs；如果字幕或播放异常，二选一
 
+如果你已经启用了 Maasea 官方的这个模块，也不要再同时启用本仓库的 `YouTubeAd.Enhance.optimized.sgmodule`：
+
+```text
+https://github.com/Maasea/sgmodule/raw/master/YouTube.Enhance.sgmodule
+```
+
+它和本仓库的 YouTubeAd 整理版使用同一个远程脚本：
+
+```text
+https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js
+```
+
+二者同时启用会让同一个 `youtubei.googleapis.com` 响应被同一套脚本处理两次，收益很小，出错概率更高。
+
 ## 我做的优化
 
 ### DualSubs YouTube
@@ -61,6 +75,8 @@ https://youtubei.googleapis.com/youtubei/v1/get_watch
 - 暴露 `BlockShorts` 参数，默认不屏蔽 Shorts
 - 保留 UDP 阻断和广告统计 URL Rewrite
 
+它和 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同。本整理版额外保留了 `yfamilys.com` 版本里的 YouTube 广告统计 URL Rewrite，并显式暴露英文参数。
+
 ## 风险提示
 
 这些模块都需要 MITM YouTube 相关域名。启用后，Surge 可以解密对应域名的 HTTPS 流量并把请求/响应交给脚本处理。
@@ -78,4 +94,3 @@ https://youtubei.googleapis.com/youtubei/v1/get_watch
 - DualSubs Universal: `https://github.com/DualSubs/Universal`
 - Maasea sgmodule: `https://github.com/Maasea/sgmodule`
 - 原始 YouTubeAd 模块: `https://yfamilys.com/sgmodule/YouTubeAd.sgmodule`
-
