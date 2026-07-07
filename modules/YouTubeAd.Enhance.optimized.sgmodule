@@ -1,0 +1,28 @@
+#!name = YouTube Ad Enhance Optimized
+#!desc = YouTube 去广告、PIP、后台播放。补齐参数，默认关闭翻译功能。
+#!author = Maasea / organized by zhaomo08
+#!homepage = https://yfamilys.com
+#!icon = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
+#!category = YouTube
+#!date = 2026-07-07
+#!version = 2025.07.12-zm1
+#!arguments = Engine:"webview",LyricLang:"off",CaptionLang:"off",BlockUpload:true,BlockImmersive:true,BlockShorts:false,Debug:false
+#!arguments-desc = Engine: 脚本执行引擎，默认 webview。\n\nLyricLang: 歌词翻译语言，默认 off。示例：zh-Hans、zh-Hant、en、ja。\n\nCaptionLang: 字幕翻译语言，默认 off。若同时使用 DualSubs，建议保持 off。\n\nBlockUpload: 是否隐藏上传按钮。\n\nBlockImmersive: 是否隐藏选段/沉浸式入口。\n\nBlockShorts: 是否隐藏 Shorts，默认 false。\n\nDebug: 是否开启调试日志，默认 false。
+
+[Rule]
+AND,((DOMAIN-SUFFIX,googlevideo.com), (PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,youtubei.googleapis.com), (PROTOCOL,UDP)),REJECT
+
+[URL Rewrite]
+(^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?)&ctier=L(&.+?),ctier,(.+) $1$2$3 302
+^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad _ reject-200
+^https?:\/\/(www|s)\.youtube\.com\/api\/stats\/ads _ reject-200
+^https?:\/\/(www|s)\.youtube\.com\/(pagead|ptracking) _ reject-200
+^https?:\/\/s\.youtube\.com\/api\/stats\/qoe\?adcontext _ reject-200
+
+[Script]
+YouTubeAd.Enhance.response = type=http-response, pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch), requires-body=1, max-size=-1, binary-body-mode=1, engine={{{Engine}}}, script-path=https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js, argument="{\"lyricLang\":\"{{{LyricLang}}}\",\"captionLang\":\"{{{CaptionLang}}}\",\"blockUpload\":{{{BlockUpload}}},\"blockImmersive\":{{{BlockImmersive}}},\"blockShorts\":{{{BlockShorts}}},\"debug\":{{{Debug}}}}"
+
+[MITM]
+hostname = %APPEND% -redirector*.googlevideo.com, *.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com
+
