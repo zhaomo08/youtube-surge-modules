@@ -65,7 +65,10 @@ https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.
 - 固定 DualSubs Universal 脚本版本为 `v1.7.5`，避免 `latest` 浮动更新导致行为变化
 - 移除原模块里 `googlevideo.com/initplayback` 的广告阻断规则
 - 收窄 MITM hostname，去掉 `*.googlevideo.com` 和 `-redirector*.googlevideo.com`
-- 默认保留 `Vendor=Google`、`LogLevel=WARN`
+- 默认字幕模式从 `Official` 改为 `Translate`，避开 YouTube 官方翻译字幕返回 `text/html` 时的 `e.timedtext.head` 解析错误
+- 默认保留 `Vendor=Google`，并将 `LogLevel` 调整为 `ERROR`，减少正常使用时的日志开销
+
+如果你在 BoxJs 或 Surge 模块参数里手动设置过 `Type=Official`，更新模块后仍可能继续走旧配置。出现 `TypeError: undefined is not an object (evaluating 'e.timedtext.head')` 时，把 DualSubs YouTube 的 `Type` 改成 `Translate`，或清理 BoxJs 里的 DualSubs YouTube 配置后重新更新模块。
 
 ### YouTubeAd Enhance
 

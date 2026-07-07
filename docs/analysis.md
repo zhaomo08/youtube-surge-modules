@@ -37,6 +37,9 @@ https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.s
 - 原模块使用 `DualSubs/Universal/releases/latest`，整理版固定到 `v1.7.5`
 - 原模块 MITM 包含 `*.googlevideo.com`，整理版去掉，避免字幕模块解密视频 CDN
 - 原模块包含 `googlevideo.com/initplayback` 阻断规则，整理版去掉，避免和去广告模块重复
+- 2026-07-07 日志显示 `subtype=Official` 的 `timedtext` 响应多次返回 `text/html`，Composite 脚本随后报 `TypeError: undefined is not an object (evaluating 'e.timedtext.head')`
+- 因此整理版默认字幕模式改为 `Type=Translate`，避开 YouTube 官方翻译字幕 HTML 响应；需要官方合成器时仍可手动切回 `Official`
+- 默认 `LogLevel` 改为 `ERROR`，降低常规运行日志开销
 
 ## YouTubeAd Enhance
 
