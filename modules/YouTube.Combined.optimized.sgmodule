@@ -4,7 +4,7 @@
 #!author = Maasea / VirgilClyne / organized by zhaomo08
 #!category = YouTube
 #!date = 2026-07-13
-#!version = 2026.07.13-zm3
+#!version = 2026.07.13-zm4
 #!arguments = Type:"Translate",Types:"Translate",Languages[0]:"AUTO",Languages[1]:"ZH-HANS",AutoCC:true,Position:"Forward",Vendor:"Google",ShowOnly:false,LogLevel:"ERROR",BlockUpload:true,BlockImmersive:true,BlockShorts:false,Debug:false
 #!arguments-desc = Type: [字幕] Official=官方合成器 / Translate=翻译器（默认，规避官方字幕 HTML 响应报错）\n\nTypes: [歌词] 启用类型，Translate=翻译歌词\n\nLanguages[0]: [字幕/歌词] 源语言，默认 AUTO（自动识别）\n\nLanguages[1]: [字幕/歌词] 目标语言，默认 ZH-HANS（简体中文）\n\nAutoCC: [字幕] 自动显示字幕\n\nPosition: [字幕] 源语言位置，Forward=第一行 / Reverse=第二行\n\nVendor: [翻译器] Google / Microsoft（自有 API 在 BoxJs 里配置 Key）\n\nShowOnly: [翻译器] 只显示翻译字幕\n\nLogLevel: [调试] OFF/ERROR/WARN/INFO/DEBUG/ALL\n\nBlockUpload: 隐藏上传按钮\n\nBlockImmersive: 隐藏选段/沉浸式入口\n\nBlockShorts: 隐藏 Shorts\n\nDebug: Maasea 脚本调试日志
 
@@ -14,9 +14,6 @@ AND,((DOMAIN-SUFFIX,googlevideo.com),(PROTOCOL,UDP)),REJECT
 AND,((DOMAIN,youtubei.googleapis.com),(PROTOCOL,UDP)),REJECT
 
 [Script]
-# 在 DualSubs 运行前规范中文目标语言，并修复历史 zh-Hant/zh-TW 缓存
-DualSubs.YouTube.Language.request = type=http-request, pattern=^https?:\/\/(?:(?:www|m)\.youtube\.com\/api\/timedtext|youtubei\.googleapis\.com\/youtubei\/v1\/(?:player|get_watch))(?:\?.*)?$, engine=webview, script-path=https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/scripts/dualsubs-language-normalizer.js, argument="{{{Languages[1]}}}"
-
 # ---- Maasea 请求阶段：处理新版加密 Onesie/UMP 播放流 ----
 YouTubeAd.Enhance.request.init = type=http-request, pattern=^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&ack.*, requires-body=1, max-size=-1, binary-body-mode=1, engine=webview, script-path=https://raw.githubusercontent.com/Maasea/sgmodule/bbd30c9318e06e129a71abae1be3812f25f43e3f/Script/Youtube/youtube.request.js, argument="{"captionLang":"off"}"
 YouTubeAd.Enhance.request.log_event = type=http-request, pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/log_event(\?.*)?$, requires-body=1, max-size=-1, binary-body-mode=1, engine=webview, script-path=https://raw.githubusercontent.com/Maasea/sgmodule/bbd30c9318e06e129a71abae1be3812f25f43e3f/Script/Youtube/youtube.request.js
