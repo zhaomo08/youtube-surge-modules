@@ -2,112 +2,109 @@
 
 整理自两个现成 Surge 模块：
 
-- DualSubs YouTube: 双语字幕和 YouTube Music 歌词翻译
-- Maasea YouTubeAd: YouTube 去广告、PIP、后台播放增强
+- [DualSubs YouTube](https://github.com/DualSubs/YouTube)：双语字幕和 YouTube Music 歌词翻译
+- [Maasea YouTube Enhance](https://github.com/Maasea/sgmodule)：YouTube 去广告、PIP、后台播放增强
 
-本仓库只保存整理后的 `.sgmodule` 和分析说明，不复制第三方远程脚本源码。模块仍然引用原作者发布的脚本地址。
+本仓库只保存整理后的 `.sgmodule` 和分析说明，不复制第三方脚本源码。
 
-## 模块
+## 模块选择
 
-| 文件 | 用途 | 建议 |
+| 文件 | 用途 | 稳定性建议 |
 | --- | --- | --- |
-| `modules/DualSubs.YouTube.optimized.sgmodule` | 双语字幕、歌词翻译 | 需要字幕时启用 |
-| `modules/YouTubeAd.Enhance.optimized.sgmodule` | 去广告、PIP、后台播放 | 需要去广告增强时启用 |
-| `modules/YouTube.Combined.optimized.sgmodule` | 上面两者的合并版（自用） | 想同时要两种效果时，只启用这一个 |
+| `modules/DualSubs.YouTube.optimized.sgmodule` | 双语字幕、歌词翻译 | 只需要字幕时启用 |
+| `modules/YouTubeAd.Enhance.optimized.sgmodule` | 去广告、PIP、后台播放 | 只需要播放增强时启用，推荐 |
+| `modules/YouTube.Combined.optimized.sgmodule` | 去广告 + 双语字幕 | 实验版；异常时退回前两个模块二选一 |
 
-## 合并版说明
-
-`YouTube.Combined.optimized.sgmodule` 把两个模块合进一个文件，利用 Surge 对同一 URL 多个响应脚本按文件顺序串行执行的行为，固定改写顺序为：Maasea 先清广告字段 → DualSubs 再注入字幕轨道。这样字幕注入不会被去广告脚本的 protobuf 重编码丢掉。
-
-- 启用合并版时，必须禁用另外两个单独模块（以及 Maasea 官方 Enhance），否则同一响应会被处理三次
-- Maasea 侧的 `lyricLang`/`captionLang` 在合并版里写死为 `off`，翻译统一交给 DualSubs（BoxJs 里可换 Vendor、填自己的翻译 API Key）
-- 如果出现播放/字幕异常，说明双脚本串行改写 protobuf 在你的客户端版本上不兼容：退回两个单独模块二选一，或只用 YouTubeAd Enhance 并把它的 `CaptionLang` 设为 `zh-Hans`（Maasea 自带简易字幕翻译，效果弱于 DualSubs 双语，但只有一个脚本、最稳）
+不要同时启用合并版、两个独立版或 Maasea 官方 Enhance。重复命中同一 protobuf 响应会增加解析失败、字段覆盖和内存占用的概率。
 
 ## 直接导入
+
+### 双语字幕
 
 ```text
 https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/modules/DualSubs.YouTube.optimized.sgmodule
 ```
 
+### 去广告、PIP、后台播放
+
 ```text
 https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/modules/YouTubeAd.Enhance.optimized.sgmodule
 ```
 
-## 重要兼容说明
+### 实验合并版
 
-不建议两个模块在同一个 Surge 配置里同时启用。
+```text
+https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/modules/YouTube.Combined.optimized.sgmodule
+```
 
-原因是两个模块都会拦截并改写：
+## 2026-07 播放链路更新
+
+Maasea 在 2026-07-11～12 日更新了 YouTube 新版加密 Onesie/UMP 播放链路。本仓库的 Enhance 与合并版已同步以下变化：
+
+- 响应端增加 `config`、`log_event`，获取并维护播放密钥配置
+- 请求端增加 `initplayback` 和 `log_event` 处理
+- 移除旧的 `initplayback &oad` Map Local 和广告统计 URL Rewrite，避免与新版请求脚本冲突
+- MITM 域名收窄到实际需要的 `*.googlevideo.com` 与 `youtubei.googleapis.com`
+- Maasea 脚本固定到审查过的提交 `bbd30c9318e06e129a71abae1be3812f25f43e3f`，避免 `master` 更新后行为静默变化
+- 移除已不被新版 Maasea 响应脚本使用的 `LyricLang` 参数
+
+固定版本意味着上游修复不会自动进入本模块。YouTube 再次改版时，应先对照 Maasea 官方模块测试，再更新固定提交。
+
+## DualSubs 优化
+
+- YouTube 脚本固定为 `v1.5.11`
+- Universal 脚本固定为 `v1.7.5`
+- 字幕模块不 MITM 视频 CDN
+- 默认使用 `Type=Translate`，规避 `subtype=Official` 偶发返回 HTML 后的解析错误
+- 默认 `LogLevel=ERROR`，减少常规日志
+
+BoxJs 持久化配置的优先级高于模块参数。如果曾在 BoxJs 设置 `Type=Official`，更新模块不会自动覆盖。出现 `e.timedtext.head` 相关错误时，请把 Type 改为 `Translate`，或清理 DualSubs YouTube 的 BoxJs 配置。
+
+## 合并版为什么仍是实验性质
+
+Maasea 和 DualSubs 都会处理：
 
 ```text
 https://youtubei.googleapis.com/youtubei/v1/player
 https://youtubei.googleapis.com/youtubei/v1/get_watch
 ```
 
-这类响应是 protobuf 二进制结构。两个脚本连续改写时，可能导致其中一个脚本解析失败，或者字幕轨道、去广告字段互相覆盖。
+这些响应是 protobuf 二进制数据。合并版按配置顺序放置 Maasea 与 DualSubs 响应脚本，但 Surge 官方脚本文档没有把“多个响应脚本对同一 body 的串行顺序”描述为稳定兼容契约，因此不能仅凭文件顺序保证所有 Surge 与 YouTube 客户端版本都正常。
 
-推荐用法：
+可能表现为：
 
-- 只需要双语字幕：启用 `DualSubs.YouTube.optimized.sgmodule`
-- 只需要去广告、PIP、后台播放：启用 `YouTubeAd.Enhance.optimized.sgmodule`
-- 两者都想用：先启用去广告模块测试播放稳定性，再启用 DualSubs；如果字幕或播放异常，二选一
+- 播放失败或长时间转圈
+- PIP、后台播放突然失效
+- 字幕轨道消失或重复
+- 脚本解析 protobuf 失败
+- Network Extension 内存占用升高
 
-如果你已经启用了 Maasea 官方的这个模块，也不要再同时启用本仓库的 `YouTubeAd.Enhance.optimized.sgmodule`：
+稳定优先时，只启用一个独立模块。
+
+## 隐私与信任边界
+
+所有模块都需要 MITM。启用后，Surge 会解密匹配域名的 HTTPS 流量，并把请求或响应交给远程脚本处理。
+
+新版 Maasea `youtube.request.js` 在命中加密 `initplayback` 且本地密钥匹配时，会把请求重定向到：
 
 ```text
-https://github.com/Maasea/sgmodule/raw/master/YouTube.Enhance.sgmodule
+https://init-stream.maasea.workers.dev/
 ```
 
-它和本仓库的 YouTubeAd 整理版使用同一个远程脚本：
+该 Worker 用于处理加密 UMP 播放流。启用前请确认你信任 Maasea、固定版本脚本及这个 Worker；这不是纯本地去广告方案。不要把翻译 API Key 写进不可信配置，也不要长期打开 Debug。
 
-```text
-https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js
-```
+## 排障顺序
 
-二者同时启用会让同一个 `youtubei.googleapis.com` 响应被同一套脚本处理两次，收益很小，出错概率更高。
+1. 确认只启用了一个本仓库模块，且没有同时启用 Maasea 官方 Enhance。
+2. 确认 `youtubei.googleapis.com` 和需要的 `googlevideo.com` 子域 MITM 成功。
+3. 强制退出 YouTube 后重新打开。
+4. 首页 Sponsored 未清理时，删除脚本持久化缓存 `YouTubeAdvertiseInfo`。
+5. 新版播放流异常时，同时删除 `YouTubeConfig`，让脚本重新获取密钥。
+6. 合并版异常时，改用 `YouTubeAd.Enhance.optimized.sgmodule` 或 DualSubs 独立版。
+7. 仍异常时，对照 Maasea 官方模块验证上游是否已有新修复。
 
-## 我做的优化
+## 上游
 
-### DualSubs YouTube
-
-- 固定 DualSubs YouTube 脚本版本为 `v1.5.11`
-- 固定 DualSubs Universal 脚本版本为 `v1.7.5`，避免 `latest` 浮动更新导致行为变化
-- 移除原模块里 `googlevideo.com/initplayback` 的广告阻断规则
-- 收窄 MITM hostname，去掉 `*.googlevideo.com` 和 `-redirector*.googlevideo.com`
-- 默认字幕模式从 `Official` 改为 `Translate`，避开 YouTube 官方翻译字幕返回 `text/html` 时的 `e.timedtext.head` 解析错误
-- 默认保留 `Vendor=Google`，并将 `LogLevel` 调整为 `ERROR`，减少正常使用时的日志开销
-
-如果你在 BoxJs 或 Surge 模块参数里手动设置过 `Type=Official`，更新模块后仍可能继续走旧配置。出现 `TypeError: undefined is not an object (evaluating 'e.timedtext.head')` 时，把 DualSubs YouTube 的 `Type` 改成 `Translate`，或清理 BoxJs 里的 DualSubs YouTube 配置后重新更新模块。
-
-### YouTubeAd Enhance
-
-- 补齐 Surge `#!arguments`，避免原模块里的中文占位符未替换导致导入后不可控
-- 默认脚本引擎设置为 `webview`
-- 默认关闭歌词翻译和字幕翻译，减少和 DualSubs 的功能重叠
-- 暴露 `BlockShorts` 参数，默认不屏蔽 Shorts
-- 保留 UDP 阻断和广告统计 URL Rewrite
-- 补回 Maasea 官方 `Map Local` 的 `googlevideo.com/initplayback.+&oad` 拦截
-- 使用 Maasea 官方 `youtubei` pattern，兼容带 query 的 `browse/player/next` 请求
-- 修正 Surge 参数传递格式，避免 Maasea 脚本出现 `JSON Parse error: Unrecognized token '\'`
-
-它和 Maasea 官方 `YouTube.Enhance.sgmodule` 的核心脚本相同。本整理版额外保留了 `yfamilys.com` 版本里的 YouTube 广告统计 URL Rewrite，并显式暴露英文参数。
-
-如果首页仍然出现 Sponsored 信息流广告，优先在 Surge 里清理脚本持久化缓存 `YouTubeAdvertiseInfo`，然后强制退出 YouTube 重新打开。Maasea 脚本会缓存 protobuf 广告字段识别结果，旧缓存误判时可能放过新的广告样式。
-
-## 风险提示
-
-这些模块都需要 MITM YouTube 相关域名。启用后，Surge 可以解密对应域名的 HTTPS 流量并把请求/响应交给脚本处理。
-
-使用前建议确认：
-
-- 你信任原脚本作者和远程脚本来源
-- 不在调试模式下长期使用
-- 第三方翻译 API Key 不随意填入不可信脚本配置
-- YouTube 播放异常时，先禁用 URL Rewrite 或只保留一个模块测试
-
-## 来源
-
-- DualSubs YouTube: `https://github.com/DualSubs/YouTube`
-- DualSubs Universal: `https://github.com/DualSubs/Universal`
-- Maasea sgmodule: `https://github.com/Maasea/sgmodule`
-- 原始 YouTubeAd 模块: `https://yfamilys.com/sgmodule/YouTubeAd.sgmodule`
+- [DualSubs YouTube](https://github.com/DualSubs/YouTube)
+- [DualSubs Universal](https://github.com/DualSubs/Universal)
+- [Maasea sgmodule](https://github.com/Maasea/sgmodule)
