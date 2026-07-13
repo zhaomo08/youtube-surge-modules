@@ -118,7 +118,7 @@ Languages = [AUTO, ZH]
 
 本仓库新增 `scripts/dualsubs-language-normalizer.js`：
 
-- 默认解析模块参数 `AUTO,ZH-HANS`
+- 读取模块目标语言参数 `Languages[1]=ZH-HANS`
 - 将 `zh`、`zh-CN`、`zh-SG` 规范为 `zh-Hans`
 - 将旧中文繁体缓存重置为当前目标
 - 仅改写中文 `tlang` 变体，不影响显式选择的非中文语言
