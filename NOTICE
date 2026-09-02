@@ -1,0 +1,16 @@
+youtube-surge-modules
+Copyright 2026 zhaomo08
+
+本仓库的 modules/ 目录为原创的 Surge 模块配置。
+vendor/ 目录包含未经修改的第三方脚本副本，各自以 Apache License 2.0 分发：
+
+- vendor/maasea/  —— 来自 Maasea/sgmodule (https://github.com/Maasea/sgmodule)
+  Copyright Maasea. Licensed under the Apache License, Version 2.0.
+  许可证副本见 vendor/maasea/LICENSE
+
+- vendor/dualsubs/  —— 来自 DualSubs/YouTube 与 DualSubs/Universal
+  (https://github.com/DualSubs/YouTube, https://github.com/DualSubs/Universal)
+  Copyright VirgilClyne. Licensed under the Apache License, Version 2.0.
+  许可证副本见 vendor/dualsubs/LICENSE
+
+这些文件是逐字节复制，未做任何修改。校验和与来源见 vendor/README.md。

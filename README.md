@@ -5,7 +5,9 @@
 - [DualSubs YouTube](https://github.com/DualSubs/YouTube)：双语字幕和 YouTube Music 歌词翻译
 - [Maasea YouTube Enhance](https://github.com/Maasea/sgmodule)：YouTube 去广告、PIP、后台播放增强
 
-本仓库只保存整理后的 `.sgmodule` 和分析说明，不复制第三方脚本源码。
+本仓库保存整理后的 `.sgmodule`、分析说明，以及 [`vendor/`](./vendor) 下第三方脚本的固定副本。
+模块的 `script-path` 指向本仓库的 `vendor/`，不再直连上游 —— 上游删库、改名或删除 release 都不会让模块失效。
+副本逐字节复制、未作修改，均为 Apache-2.0，署名见 [`NOTICE`](./NOTICE)，来源与校验和见 [`vendor/README.md`](./vendor/README.md)。
 
 ## 模块选择
 
@@ -48,10 +50,17 @@ Maasea 在 2026-07-11～12 日更新了 YouTube 新版加密 Onesie/UMP 播放�
 - 请求端增加 `initplayback` 和 `log_event` 处理
 - 移除旧的 `initplayback &oad` Map Local 和广告统计 URL Rewrite，避免与新版请求脚本冲突
 - MITM 域名收窄到实际需要的 `*.googlevideo.com` 与 `youtubei.googleapis.com`
-- Maasea 脚本固定到审查过的提交 `bbd30c9318e06e129a71abae1be3812f25f43e3f`，避免 `master` 更新后行为静默变化
+- Maasea 脚本固定到审查过的提交 `bbd30c9318e06e129a71abae1be3812f25f43e3f`，副本存于 `vendor/maasea/`，避免 `master` 更新后行为静默变化
 - 移除已不被新版 Maasea 响应脚本使用的 `LyricLang` 参数
 
 固定版本意味着上游修复不会自动进入本模块。YouTube 再次改版时，应先对照 Maasea 官方模块测试，再更新固定提交。
+
+检查与同步上游：
+
+```bash
+./scripts/sync-vendor.sh          # 只对比，不写入
+./scripts/sync-vendor.sh --apply  # 确认差异后再更新副本
+```
 
 ## DualSubs 优化
 
@@ -136,6 +145,10 @@ https://init-stream.maasea.workers.dev/
 
 ## 上游
 
-- [DualSubs YouTube](https://github.com/DualSubs/YouTube)
-- [DualSubs Universal](https://github.com/DualSubs/Universal)
-- [Maasea sgmodule](https://github.com/Maasea/sgmodule)
+脚本作者与版权方，本仓库仅做配置整理与副本固定：
+
+- [DualSubs YouTube](https://github.com/DualSubs/YouTube) — VirgilClyne，Apache-2.0
+- [DualSubs Universal](https://github.com/DualSubs/Universal) — VirgilClyne，Apache-2.0
+- [Maasea sgmodule](https://github.com/Maasea/sgmodule) — Maasea，Apache-2.0
+
+觉得好用请去给上游点 star。
