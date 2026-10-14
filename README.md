@@ -20,7 +20,7 @@
 | `modules/YouTubeAd.Enhance.optimized.sgmodule` | 去广告、PIP、后台播放 | 只需要播放增强时启用，推荐 |
 | `modules/YouTube.Combined.optimized.sgmodule` | 去广告 + 双语字幕 | 实验版；异常时退回前两个模块二选一 |
 
-不要同时启用合并版、两个独立版或 Maasea 官方 Enhance。重复命中同一 protobuf 响应会增加解析失败、字段覆盖和内存占用的概率。
+不要同时启用合并版、两个独立版或 Maasea 官方 Enhance。[Surge 官方响应文档](https://manual.nssurge.com/scripting/http-response.html)明确：每个响应只运行首个匹配脚本，后续脚本不会串行接力；多个模块会相互抢占而不是叠加功能。
 
 ## 直接导入
 
@@ -44,11 +44,12 @@ https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/update/upstream
 
 ## 2026-10-14 配套更新
 
-- 字幕独立版与实验合并版升级为 `2026.10.14-zm6`，仅播放增强独立版保持 `zm5`；导入及脚本链接均指向 `update/upstream-20261014` 分支，不读取旧 main。
+- 实验合并版现为 `2026.10.14-zm7`，字幕独立版保持 `zm6`，播放增强独立版保持 `zm5`；导入及脚本链接均指向 `update/upstream-20261014` 分支，不读取旧 main。
+- zm7 仅收窄合并版响应匹配：消除 Maasea 已覆盖的三个 HTTPS 重叠分支，保留 HTTP 路径；限定 subtype 参数边界，避免相似参数误触发解析/翻译。不改 vendor、body limit、引擎、语言、Translate、广告/PIP/后台能力。详见 [zm7 审查与测试](./docs/combined-zm7.md)。
 - DualSubs YouTube 更新至 `v1.6.0`（2026-10-11），Universal 更新至 `v1.8.1`（2026-10-13）。
 - Maasea 固定至 `65075cdb388fc5e3094afd7e7314c67b243f3525`（2026-07-19，`fix ad judgment`）；请求脚本与此前固定版本逐字节一致。
 - zm5 同步固定上游；zm6 仅在原有四个 DualSubs 脚本加入受模块参数启用的简中补丁，不增加规则或脚本，不改 Maasea。
-- 已完成下载、SHA-256、链接和 JavaScript 语法检查；Surge 真机播放、字幕及合并版兼容性仍待验证。
+- 用户已确认 zm6 真机简中正常；这不等于所有 protobuf、歌词与播放增强分支兼容。zm7 已完成离线实际 bundle/mock 回归；zm7 Surge 真机回归仍待完成。
 
 ## 2026-07 播放链路更新
 
@@ -93,7 +94,7 @@ zm6 在两份模块原有 DualSubs script argument 中显式启用 `ForceSimplif
 
 更新 Surge 模块并清理/刷新远程脚本缓存，然后重开 YouTube 视频即可；**不要求手动清 BoxJS 或旧 tlang 缓存**。未启用该参数的脚本仍执行上游原有语言选择逻辑。补丁复现和 288 个 Node mock 回归用例见 [验证记录](./docs/simplified-chinese-zm6.md)，不等于 Surge 真机与翻译 API 实测。
 
-不要额外添加一个同样匹配 player/timedtext 的请求脚本来修改缓存；Surge 可能只执行首个命中的请求脚本，导致 DualSubs 无法添加 `subtype=Translate`，最终只显示原始英文字幕。
+不要额外添加一个同样匹配 player/timedtext 的请求脚本来修改缓存；[Surge 官方请求文档](https://manual.nssurge.com/scripting/http-request.html)明确每个请求只执行首个匹配脚本，后续 DualSubs 无法添加 `subtype=Translate` 时可能只显示原始字幕。
 
 ## 画中画字幕限制
 
@@ -101,7 +102,7 @@ zm6 在两份模块原有 DualSubs script argument 中显式启用 `ForceSimplif
 
 原因是 DualSubs 和 Maasea 修改的是 YouTube API 返回的字幕轨道与播放器能力；进入 iOS 系统 PiP 后，字幕是否作为系统可渲染的媒体字幕交给 AVPlayer，由 YouTube 客户端决定。Maasea 的相关请求 [Issue #72](https://github.com/Maasea/sgmodule/issues/72) 已以 `not planned` 关闭。
 
-本仓库不会为此同时开启 Maasea `CaptionLang` 与 DualSubs，因为两套实现都会改写 player/get_watch protobuf，增加字幕关闭、字段覆盖和播放失败风险，却不能保证 PiP 字幕。
+本仓库继续保持 Maasea `captionLang=off`，不以启用第二套字幕实现来替代 DualSubs timedtext 翻译，也不把它宣称为 PiP 字幕修复；客户端是否交付字幕轨道仍不受模块保证。
 
 可尝试但不保证：
 
@@ -118,7 +119,11 @@ https://youtubei.googleapis.com/youtubei/v1/player
 https://youtubei.googleapis.com/youtubei/v1/get_watch
 ```
 
-这些响应是 protobuf 二进制数据。合并版按配置顺序放置 Maasea 与 DualSubs 响应脚本，但 Surge 官方脚本文档没有把“多个响应脚本对同一 body 的串行顺序”描述为稳定兼容契约，因此不能仅凭文件顺序保证所有 Surge 与 YouTube 客户端版本都正常。
+Surge 官方明确每个响应**只执行首个匹配的 http-response 脚本**（“At most one script runs per response ... first ... matches wins”），不是顺序串行。zm6 的这两个 HTTPS protobuf 响应实际由 Maasea 独占；DualSubs player/get_watch 响应不会接着运行。zm7 收窄被遮蔽的 HTTPS 规则，仅保留原本可到达的 HTTP 范围，不改变正常流量的获胜脚本。
+
+因此，字幕可能依靠独占的 timedtext 请求/Translate 响应正常工作（用户已确认 zm6 简中正常），但不能宣称同时完成 DualSubs 的 HTTPS 字幕轨道注入；HTTPS protobuf browse 歌词翻译同样原已被 Maasea 遮蔽。JSON player、music.youtube.com JSON 歌词与 timedtext 仍保留原路径。
+
+未引入未经真机验证的单入口调度器，没有交换优先级或删除 Maasea 的 player/get_watch/browse 范围。实验标识保留；支持全部分支的串联需要额外开发与真实客户端验证。官方证据、性能边界与测试见 [zm7 记录](./docs/combined-zm7.md)。
 
 可能表现为：
 
@@ -148,7 +153,7 @@ https://init-stream.maasea.workers.dev/
 2. 确认 `youtubei.googleapis.com` 和需要的 `googlevideo.com` 子域 MITM 成功。
 3. 强制退出 YouTube 后重新打开。
 4. 首页 Sponsored 未清理时，删除脚本持久化缓存 `YouTubeAdvertiseInfo`。
-5. 字幕仍显示繁体时，确认模块为 zm6、刷新 Surge 远程脚本缓存并重开视频；不必手动删除 BoxJS/tlang。
+5. 字幕仍显示繁体时，确认字幕独立版为 zm6 或合并版为 zm7（均保留简中补丁）、刷新 Surge 远程脚本缓存并重开视频；不必手动删除 BoxJS/tlang。
 6. 新版播放流异常时，同时删除 `YouTubeConfig`，让脚本重新获取密钥。
 7. 合并版异常时，改用 `YouTubeAd.Enhance.optimized.sgmodule` 或 DualSubs 独立版。
 8. 仍异常时，对照 Maasea 官方模块验证上游是否已有新修复。

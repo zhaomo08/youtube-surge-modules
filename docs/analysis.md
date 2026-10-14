@@ -9,7 +9,7 @@
 - 历史审查采用的 DualSubs 正式版本为 `YouTube v1.5.11` 与 `Universal v1.7.5`。
 - 仓库原 YouTubeAd 模块使用的是 2025-07 构建的响应脚本配置，已落后于 Maasea 2026-07 的加密播放链路。
 - Maasea 新版不再只改写普通 `player/get_watch` 响应，还需要处理 `config`、`log_event` 和 `googlevideo.com/initplayback`。
-- 合并版存在两个脚本连续解析和重编码同一 protobuf body 的结构性风险，只能作为实验方案。
+- 合并版的结构性问题是首匹配抢占，不是双脚本连续重编码：[Surge 官方](https://manual.nssurge.com/scripting/http-response.html)明确一个响应最多执行一个脚本。zm7 已消除被遮蔽的 HTTPS 匹配，但未实现串联，完整字幕/歌词兼容性仍不能保证。详见 [zm7 审查](./combined-zm7.md)。
 
 ## DualSubs YouTube
 
@@ -97,7 +97,9 @@ youtubei.googleapis.com/youtubei/v1/player
 youtubei.googleapis.com/youtubei/v1/get_watch
 ```
 
-Maasea 负责删除广告字段并注入 PIP/后台播放能力，DualSubs 负责注入字幕轨道。两者都需要解析并重新编码 protobuf。Surge 官方文档说明了 body 脚本的内存与匹配行为，但没有给出可依赖的多响应脚本链式组合契约。
+Maasea 负责删除广告字段并注入 PIP/后台播放能力，DualSubs 负责注入字幕轨道。两者各自具有 protobuf 编解码实现，但 [Surge 官方响应文档](https://manual.nssurge.com/scripting/http-response.html)明确每个响应只执行首个匹配脚本，不会自动串联。因此原合并版这些 HTTPS 响应实际仅由 Maasea 处理，DualSubs 轨道注入原本就不可达；HTTPS protobuf browse 歌词翻译也被同一 Maasea 规则遮蔽。
+
+zm7 只收窄后续三个规则至原本可到达的 HTTP 范围，不交换优先级、不删除播放增强匹配。timedtext 与 JSON player/歌词分支保持；不能因简中真机已正常就断言全路径组合稳定。
 
 因此合并版即使在某个版本上可用，也可能随以下任一项变化而失效：
 
@@ -118,7 +120,7 @@ Languages = [AUTO, ZH]
 
 并在 timedtext 请求中优先读取 `Caches.tlang`。用户曾选择 `zh-Hant` 时，该值会保存到 `@DualSubs.YouTube.Caches.tlang`，优先级高于默认目标语言。
 
-本仓库通过 DualSubs 原生参数 `Languages[0]=AUTO`、`Languages[1]=ZH-HANS` 指定简体目标。历史 `Caches.tlang` 仍需由用户选择一次“中文（简体）”或手动清除。
+历史整理仅通过原生参数指定简体目标，无法覆盖旧 URL/缓存。当前 zm6/zm7 已通过受显式参数启用的补丁修复，保留源语言，不需要手动清除旧 tlang；用户已确认 zm6 真机简中正常。见 [zm6 验证](./simplified-chinese-zm6.md)。
 
 曾尝试添加独立请求脚本自动改写缓存，但它会与 DualSubs 的 player/timedtext 请求脚本命中相同 URL。在实际 Surge 日志中，独立脚本抢占后只剩 browse 日志，DualSubs 未能添加 `subtype=Translate`，结果仅显示英文原字幕。该方案已在 `zm4` 删除。
 
@@ -131,7 +133,7 @@ Maasea Issue #72 的 PiP 字幕请求已以 `not_planned` 关闭且没有上游�
 - 普通播放器字幕可通过 DualSubs 优化
 - PiP 能力可通过 Maasea 解锁
 - PiP 内字幕不能由现有 Surge module 保证
-- 同时开启 Maasea CaptionLang 与 DualSubs 不是可靠修复，会扩大 protobuf 重编码冲突面
+- 保持 Maasea captionLang=off，不额外启用第二套字幕实现；当前首匹配机制不代表能叠加两套响应修改，也不能保证 PiP 字幕
 
 ## 验证清单
 
