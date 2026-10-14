@@ -4,9 +4,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MAASEA_REF=bbd30c9318e06e129a71abae1be3812f25f43e3f
-DUALSUBS_YT=v1.5.11
-DUALSUBS_UNI=v1.7.5
+MAASEA_REF=65075cdb388fc5e3094afd7e7314c67b243f3525
+DUALSUBS_YT=v1.6.0
+DUALSUBS_UNI=v1.8.1
 
 M="https://raw.githubusercontent.com/Maasea/sgmodule/$MAASEA_REF/Script/Youtube"
 DY="https://github.com/DualSubs/YouTube/releases/download/$DUALSUBS_YT"
@@ -34,7 +34,10 @@ for entry in "${FILES[@]}"; do
   else
     changed=1
     echo "≠ $dest  ($(wc -c <"$dest") B -> $(wc -c <"$tmp/f") B)"
-    (( apply )) && cp "$tmp/f" "$dest" && echo "  已更新，新 SHA: $(shasum -a 256 "$dest" | cut -d' ' -f1)"
+    if (( apply )); then
+      cp "$tmp/f" "$dest"
+      echo "  已更新，新 SHA: $(shasum -a 256 "$dest" | cut -d' ' -f1)"
+    fi
   fi
 done
 

@@ -27,20 +27,28 @@
 ### 双语字幕
 
 ```text
-https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/modules/DualSubs.YouTube.optimized.sgmodule
+https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/update/upstream-20261014/modules/DualSubs.YouTube.optimized.sgmodule
 ```
 
 ### 去广告、PIP、后台播放
 
 ```text
-https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/modules/YouTubeAd.Enhance.optimized.sgmodule
+https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/update/upstream-20261014/modules/YouTubeAd.Enhance.optimized.sgmodule
 ```
 
 ### 实验合并版
 
 ```text
-https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/main/modules/YouTube.Combined.optimized.sgmodule
+https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/update/upstream-20261014/modules/YouTube.Combined.optimized.sgmodule
 ```
+
+## 2026-10-14 配套更新
+
+- 三个模块版本统一为 `2026.10.14-zm5`，导入及脚本链接均指向 `update/upstream-20261014` 分支，不读取旧 main。
+- DualSubs YouTube 更新至 `v1.6.0`（2026-10-11），Universal 更新至 `v1.8.1`（2026-10-13）。
+- Maasea 固定至 `65075cdb388fc5e3094afd7e7314c67b243f3525`（2026-07-19，`fix ad judgment`）；请求脚本与此前固定版本逐字节一致。
+- 仅同步脚本、版本与 Storage 参数；保留原有规则与 settings 取舍，不照搬官方广告规则。
+- 已完成下载、SHA-256、链接和 JavaScript 语法检查；Surge 真机播放、字幕及合并版兼容性仍待验证。
 
 ## 2026-07 播放链路更新
 
@@ -50,7 +58,7 @@ Maasea 在 2026-07-11～12 日更新了 YouTube 新版加密 Onesie/UMP 播放�
 - 请求端增加 `initplayback` 和 `log_event` 处理
 - 移除旧的 `initplayback &oad` Map Local 和广告统计 URL Rewrite，避免与新版请求脚本冲突
 - MITM 域名收窄到实际需要的 `*.googlevideo.com` 与 `youtubei.googleapis.com`
-- Maasea 脚本固定到审查过的提交 `bbd30c9318e06e129a71abae1be3812f25f43e3f`，副本存于 `vendor/maasea/`，避免 `master` 更新后行为静默变化
+- Maasea 脚本固定到提交 `65075cdb388fc5e3094afd7e7314c67b243f3525`，副本存于 `vendor/maasea/`，避免 `master` 更新后行为静默变化
 - 移除已不被新版 Maasea 响应脚本使用的 `LyricLang` 参数
 
 固定版本意味着上游修复不会自动进入本模块。YouTube 再次改版时，应先对照 Maasea 官方模块测试，再更新固定提交。
@@ -64,14 +72,14 @@ Maasea 在 2026-07-11～12 日更新了 YouTube 新版加密 Onesie/UMP 播放�
 
 ## DualSubs 优化
 
-- YouTube 脚本固定为 `v1.5.11`
-- Universal 脚本固定为 `v1.7.5`
+- YouTube 脚本固定为 `v1.6.0`
+- Universal 脚本固定为 `v1.8.1`
 - 字幕模块不 MITM 视频 CDN
 - 默认使用 `Type=Translate`，规避 `subtype=Official` 偶发返回 HTML 后的解析错误
 - 显式设置 `Languages[0]=AUTO`、`Languages[1]=ZH-HANS`，默认翻译为简体中文
 - 默认 `LogLevel=ERROR`，减少常规日志
 
-BoxJs 持久化配置的优先级高于模块参数。如果曾在 BoxJs 设置 `Type=Official`，更新模块不会自动覆盖。出现 `e.timedtext.head` 相关错误时，请把 Type 改为 `Translate`，或清理 DualSubs YouTube 的 BoxJs 配置。
+默认 `Storage=PersistentStore`：BoxJs/设置面板持久化配置优先，其次是模块参数，最后是脚本默认配置。官方 release 模块与四个脚本均支持该参数；未强制改成 `Argument`。如明确需要模块参数优先，可自行选择 `Storage=Argument`；`database` 则仅使用脚本默认配置。如果曾在 BoxJs 设置 `Type=Official`，更新模块不会自动覆盖。出现 `e.timedtext.head` 相关错误时，请把 Type 改为 `Translate`，或清理 DualSubs YouTube 的 BoxJs 配置。
 
 ## 简体中文语言修复
 

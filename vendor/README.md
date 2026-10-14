@@ -6,18 +6,20 @@
 **这些文件逐字节复制自上游，未做任何修改。** 许可证均为 Apache-2.0，副本见各子目录 `LICENSE`。
 署名见仓库根目录 `NOTICE`。
 
-拉取日期：2026-09-02
+拉取日期：2026-10-14
 
 | 文件 | 上游版本 | 来源 | SHA-256 |
 | --- | --- | --- | --- |
-| `maasea/youtube.response.js` | commit `bbd30c9` (2026-07-12) | Maasea/sgmodule | `eeae2957ac31f6bbe36f08b60db1a80e110e79b83bdd9b41fce3a5d871c4a504` |
-| `maasea/youtube.request.js` | commit `bbd30c9` (2026-07-12) | Maasea/sgmodule | `3ecca15e06e76a31720092c581180f648ef2c45e494644941ba985c878efbb26` |
-| `dualsubs/YouTube.request.bundle.js` | v1.5.11 (2024-12-11) | DualSubs/YouTube releases | `bcc3f609678e27d6e3dd4f901359b3f5359c9d4cb8d60f05e9be5e158f1d06b6` |
-| `dualsubs/YouTube.response.bundle.js` | v1.5.11 (2024-12-11) | DualSubs/YouTube releases | `b970db912ca06e32c25e18ab70deaed94a308aad6d50b7a5b25cd8a88cf888e9` |
-| `dualsubs/Universal.Composite.Subtitles.response.bundle.js` | v1.7.5 (2025-11-23) | DualSubs/Universal releases | `5929a9af89baf763775d642e002f91ce51f76ebe68f70e397d546e1f4cb8020d` |
-| `dualsubs/Universal.Translate.response.bundle.js` | v1.7.5 (2025-11-23) | DualSubs/Universal releases | `3289e75916b05b4700a0394b3dd03f458a68e3806adc3ab3526f45d59d85ba4b` |
+| `maasea/youtube.response.js` | commit `65075cd` (2026-07-19) | Maasea/sgmodule | `f98483d5f5017514f82502253c0db5ce2d4ffb7839887aa2cadc22666f5a7f12` |
+| `maasea/youtube.request.js` | commit `65075cd` (2026-07-19) | Maasea/sgmodule | `3ecca15e06e76a31720092c581180f648ef2c45e494644941ba985c878efbb26` |
+| `dualsubs/YouTube.request.bundle.js` | v1.6.0 (2026-10-11) | DualSubs/YouTube releases | `128dd4ff56a718965018cef2ce404bcedf337b473099b529d92bbe4df1c0e6c6` |
+| `dualsubs/YouTube.response.bundle.js` | v1.6.0 (2026-10-11) | DualSubs/YouTube releases | `a6f387776255bc8510efebc4bb9e580e85a171ff8b332bb0d5707c82f0f2ab07` |
+| `dualsubs/Universal.Composite.Subtitles.response.bundle.js` | v1.8.1 (2026-10-13) | DualSubs/Universal releases | `c42404fc4bff7dd10cb27ebfcf7d92c89f6584f5067ea37752d36750767c17df` |
+| `dualsubs/Universal.Translate.response.bundle.js` | v1.8.1 (2026-10-13) | DualSubs/Universal releases | `a9d9efc80854641886073985827de269503849c4d6c5f9d02f4e7627097ed8da` |
 
-`v1.5.11` 与 `v1.7.5` 分别是 DualSubs/YouTube 和 DualSubs/Universal 截至拉取日的**最新 release**。
+`v1.6.0` 与 `v1.8.1` 分别是 DualSubs/YouTube 和 DualSubs/Universal 截至拉取日的**最新 release**。
+
+Maasea 完整固定提交为 `65075cdb388fc5e3094afd7e7314c67b243f3525`（`fix ad judgment`）；请求脚本与旧固定提交 `bbd30c9318e06e129a71abae1be3812f25f43e3f` 一致。四个 DualSubs 文件已核对 GitHub release asset 的 SHA-256 digest；六个副本均与固定来源逐字节一致。
 
 ## 如何同步上游
 

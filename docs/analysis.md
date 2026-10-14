@@ -1,10 +1,12 @@
 # 模块分析和整理记录
 
-审查日期：2026-07-13。
+历史审查日期：2026-07-13。
+
+2026-10-14 配套更新：当前固定版本为 YouTube `v1.6.0`、Universal `v1.8.1`、Maasea `65075cdb388fc5e3094afd7e7314c67b243f3525`。新增 `Storage=PersistentStore`，保留持久化配置优先。以下旧版本描述为历史审查记录，不表示当前最新版本；本次未进行 Surge 真机验证。
 
 ## 结论
 
-- DualSubs 固定的 `YouTube v1.5.11` 与 `Universal v1.7.5` 仍是各自最新正式版本。
+- 历史审查采用的 DualSubs 正式版本为 `YouTube v1.5.11` 与 `Universal v1.7.5`。
 - 仓库原 YouTubeAd 模块使用的是 2025-07 构建的响应脚本配置，已落后于 Maasea 2026-07 的加密播放链路。
 - Maasea 新版不再只改写普通 `player/get_watch` 响应，还需要处理 `config`、`log_event` 和 `googlevideo.com/initplayback`。
 - 合并版存在两个脚本连续解析和重编码同一 protobuf body 的结构性风险，只能作为实验方案。
