@@ -7,7 +7,7 @@
 
 本仓库保存整理后的 `.sgmodule`、分析说明，以及 [`vendor/`](./vendor) 下第三方脚本的固定副本。
 模块的 `script-path` 指向本仓库的 `vendor/`，不再直连上游 —— 上游删库、改名或删除 release 都不会让模块失效。
-副本逐字节复制、未作修改，均为 Apache-2.0，署名见 [`NOTICE`](./NOTICE)，来源与校验和见 [`vendor/README.md`](./vendor/README.md)。
+副本均为 Apache-2.0；Maasea 保持上游原样，四个 DualSubs 脚本带可重复的最小简中补丁，署名见 [`NOTICE`](./NOTICE)，上游原始与本地校验和见 [`vendor/README.md`](./vendor/README.md)。
 
 ## 模块选择
 
@@ -44,10 +44,10 @@ https://raw.githubusercontent.com/zhaomo08/youtube-surge-modules/update/upstream
 
 ## 2026-10-14 配套更新
 
-- 三个模块版本统一为 `2026.10.14-zm5`，导入及脚本链接均指向 `update/upstream-20261014` 分支，不读取旧 main。
+- 字幕独立版与实验合并版升级为 `2026.10.14-zm6`，仅播放增强独立版保持 `zm5`；导入及脚本链接均指向 `update/upstream-20261014` 分支，不读取旧 main。
 - DualSubs YouTube 更新至 `v1.6.0`（2026-10-11），Universal 更新至 `v1.8.1`（2026-10-13）。
 - Maasea 固定至 `65075cdb388fc5e3094afd7e7314c67b243f3525`（2026-07-19，`fix ad judgment`）；请求脚本与此前固定版本逐字节一致。
-- 仅同步脚本、版本与 Storage 参数；保留原有规则与 settings 取舍，不照搬官方广告规则。
+- zm5 同步固定上游；zm6 仅在原有四个 DualSubs 脚本加入受模块参数启用的简中补丁，不增加规则或脚本，不改 Maasea。
 - 已完成下载、SHA-256、链接和 JavaScript 语法检查；Surge 真机播放、字幕及合并版兼容性仍待验证。
 
 ## 2026-07 播放链路更新
@@ -79,7 +79,7 @@ Maasea 在 2026-07-11～12 日更新了 YouTube 新版加密 Onesie/UMP 播放�
 - 显式设置 `Languages[0]=AUTO`、`Languages[1]=ZH-HANS`，默认翻译为简体中文
 - 默认 `LogLevel=ERROR`，减少常规日志
 
-默认 `Storage=PersistentStore`：BoxJs/设置面板持久化配置优先，其次是模块参数，最后是脚本默认配置。官方 release 模块与四个脚本均支持该参数；未强制改成 `Argument`。如明确需要模块参数优先，可自行选择 `Storage=Argument`；`database` 则仅使用脚本默认配置。如果曾在 BoxJs 设置 `Type=Official`，更新模块不会自动覆盖。出现 `e.timedtext.head` 相关错误时，请把 Type 改为 `Translate`，或清理 DualSubs YouTube 的 BoxJs 配置。
+默认 `Storage=PersistentStore`：除目标语言修复外，BoxJs/设置面板持久化配置仍优先，其次是模块参数，最后是脚本默认配置。无需为了简中把 Storage 改为 Argument；仅换 Storage 也挡不住 URL/缓存里的旧 tlang。`ForceSimplifiedChinese=true` 从显式模块参数读取，不受 BoxJs 合并顺序影响。如果曾在 BoxJs 设置 `Type=Official`，更新模块不会自动覆盖；Official 与 Translate 均走简中修复。出现 `e.timedtext.head` 相关错误时，可把 Type 改为 `Translate`，这是官方响应格式问题而非语言缓存问题。
 
 ## 简体中文语言修复
 
@@ -89,7 +89,9 @@ DualSubs 原始默认值是 `Languages=[AUTO,ZH]`，其中 `ZH` 只是泛化中�
 @DualSubs.YouTube.Caches.tlang
 ```
 
-本仓库已让所有 DualSubs 请求与响应脚本显式接收 `Languages[0]=AUTO`、`Languages[1]=ZH-HANS`。如果旧 `tlang` 缓存仍为繁体，请在 YouTube 字幕菜单选择一次“中文（简体）”，或删除 `@DualSubs.YouTube.Caches.tlang` 后重开 YouTube。
+zm6 在两份模块原有 DualSubs script argument 中显式启用 `ForceSimplifiedChinese="true"`。四个脚本在设置合并后强制目标 `ZH-HANS`，纠正本次读取的旧 `Caches.tlang`；已有 URL tlang 纠正为 `zh-Hans`。YouTube timedtext 请求在 AutoCC 开启时补齐目标，随后仍由原脚本执行：Translate 删除 tlang 并保留 `subtype=Translate`，Official 使用 `tlang=zh-Hans` 并保留 `subtype=Official`，原有缓存写入会保存正确值。Universal 两条响应路径再强制目标，避免遗漏缓存覆盖。源语言 `Languages[0]`/URL lang 不改；强制简中时不再因源/目标同属 zh 自动打开 ShowOnly，仍尊重显式 ShowOnly 设置。
+
+更新 Surge 模块并清理/刷新远程脚本缓存，然后重开 YouTube 视频即可；**不要求手动清 BoxJS 或旧 tlang 缓存**。未启用该参数的脚本仍执行上游原有语言选择逻辑。补丁复现和 288 个 Node mock 回归用例见 [验证记录](./docs/simplified-chinese-zm6.md)，不等于 Surge 真机与翻译 API 实测。
 
 不要额外添加一个同样匹配 player/timedtext 的请求脚本来修改缓存；Surge 可能只执行首个命中的请求脚本，导致 DualSubs 无法添加 `subtype=Translate`，最终只显示原始英文字幕。
 
@@ -146,7 +148,7 @@ https://init-stream.maasea.workers.dev/
 2. 确认 `youtubei.googleapis.com` 和需要的 `googlevideo.com` 子域 MITM 成功。
 3. 强制退出 YouTube 后重新打开。
 4. 首页 Sponsored 未清理时，删除脚本持久化缓存 `YouTubeAdvertiseInfo`。
-5. 字幕仍显示繁体时，在 YouTube 选择一次“中文（简体）”，或删除 `@DualSubs.YouTube.Caches.tlang` 后重新打开视频。
+5. 字幕仍显示繁体时，确认模块为 zm6、刷新 Surge 远程脚本缓存并重开视频；不必手动删除 BoxJS/tlang。
 6. 新版播放流异常时，同时删除 `YouTubeConfig`，让脚本重新获取密钥。
 7. 合并版异常时，改用 `YouTubeAd.Enhance.optimized.sgmodule` 或 DualSubs 独立版。
 8. 仍异常时，对照 Maasea 官方模块验证上游是否已有新修复。

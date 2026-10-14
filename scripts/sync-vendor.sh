@@ -26,23 +26,31 @@ apply=0; [[ "${1:-}" == "--apply" ]] && apply=1
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 changed=0
 
+# Stage every asset and validate/reapply local patches BEFORE writing any file.
 for entry in "${FILES[@]}"; do
   dest="${entry%%|*}"; url="${entry##*|}"
-  curl -sfL "$url" -o "$tmp/f" || { echo "✗ 下载失败: $url"; exit 1; }
-  if cmp -s "$tmp/f" "$dest"; then
+  mkdir -p "$tmp/$(dirname "$dest")"
+  curl -sfL "$url" -o "$tmp/$dest" || { echo "✗ 下载失败: $url"; exit 1; }
+  python3 scripts/patch-dualsubs.py "$tmp/$dest"
+  node --check "$tmp/$dest"
+done
+
+for entry in "${FILES[@]}"; do
+  dest="${entry%%|*}"
+  if cmp -s "$tmp/$dest" "$dest"; then
     echo "= $dest"
   else
     changed=1
-    echo "≠ $dest  ($(wc -c <"$dest") B -> $(wc -c <"$tmp/f") B)"
+    echo "≠ $dest  ($(wc -c <"$dest") B -> $(wc -c <"$tmp/$dest") B)"
     if (( apply )); then
-      cp "$tmp/f" "$dest"
+      cp "$tmp/$dest" "$dest"
       echo "  已更新，新 SHA: $(shasum -a 256 "$dest" | cut -d' ' -f1)"
     fi
   fi
 done
 
 if (( changed == 0 )); then
-  echo "vendor/ 与上游一致。"
+  echo "vendor/ 与固定上游 + 本地简中补丁一致。"
 elif (( apply )); then
   echo
   echo "已写入。接下来必须做："
